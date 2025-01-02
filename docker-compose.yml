@@ -1,0 +1,38 @@
+
+
+services:
+  router1:
+    build: .
+    container_name: router1
+    networks:
+      netdevops_bridge:
+        ipv4_address: 172.19.0.2
+    privileged: true
+
+  router2:
+    build: .
+    container_name: router2
+    networks:
+      netdevops_bridge:
+        ipv4_address: 172.19.0.3
+    privileged: true
+
+  router3:
+    build: .
+    container_name: router3
+    networks:
+      netdevops_bridge:
+        ipv4_address: 172.19.0.4
+    privileged: true
+
+  router4:
+    build: .
+    container_name: router4
+    networks:
+      netdevops_bridge:
+        ipv4_address: 172.19.0.5
+    privileged: true
+
+networks:
+  netdevops_bridge:
+    external: true
