@@ -1,2 +1,2 @@
 # docker_rt1_rt2
-Simular dos routers conectados, con pruebas de ping
+Simular 4 routers conectados por BGP
