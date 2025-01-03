@@ -64,3 +64,4 @@ networks:
     ipam:
       config:
         - subnet: 192.168.10.0/24
+
