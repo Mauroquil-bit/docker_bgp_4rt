@@ -1,38 +1,24 @@
-
+version: '3.8'
 
 services:
   router1:
-    build: .
+    image: docker_rt1_rt2-router1
     container_name: router1
     networks:
       netdevops_bridge:
-        ipv4_address: 172.19.0.2
-    privileged: true
+        ipv4_address: 192.168.1.2
 
   router2:
-    build: .
+    image: docker_rt1_rt2-router2
     container_name: router2
     networks:
       netdevops_bridge:
-        ipv4_address: 172.19.0.3
-    privileged: true
-
-  router3:
-    build: .
-    container_name: router3
-    networks:
-      netdevops_bridge:
-        ipv4_address: 172.19.0.4
-    privileged: true
-
-  router4:
-    build: .
-    container_name: router4
-    networks:
-      netdevops_bridge:
-        ipv4_address: 172.19.0.5
-    privileged: true
+        ipv4_address: 192.168.1.3
 
 networks:
   netdevops_bridge:
-    external: true
+    name: docker_rt1_rt2_netdevops_bridge  # Asegúrate de que coincide con el nombre de la red inspeccionada
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24

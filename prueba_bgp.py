@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+
 import netmiko
+
+# El resto de tu script...
+print("Simulación de BGP activa")
+
 
 def configure_router(router_ip, username, password):
     connection = netmiko.ConnectHandler(
