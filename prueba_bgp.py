@@ -31,12 +31,14 @@ def configure_router(router_ip, username, password):
     connection.disconnect()
 
 if __name__ == "__main__":
+    
     routers = [
-        {"ip": "172.19.0.2", "username": "root", "password": "password"},
-        {"ip": "172.19.0.3", "username": "root", "password": "password"},
-        {"ip": "172.19.0.4", "username": "root", "password": "password"},
-        {"ip": "172.19.0.5", "username": "root", "password": "password"}
-    ]
+    {"ip": "10.0.0.2", "username": "root", "password": "password"},
+    {"ip": "10.0.0.3", "username": "root", "password": "password"},
+    {"ip": "10.0.0.4", "username": "root", "password": "password"},
+    {"ip": "10.0.0.5", "username": "root", "password": "password"}
+]
+
     
     for router in routers:
         configure_router(router["ip"], router["username"], router["password"])
