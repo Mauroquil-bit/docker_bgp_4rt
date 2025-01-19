@@ -3,14 +3,13 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-
 # Instalar dependencias necesarias
 RUN apt-get update && apt-get install -y \
     quagga \
     iproute2 \
     python3 \
     python3-pip \
-    openssh-server
+    openssh-server \
     iputils-ping
 
 # Configurar el servidor SSH
@@ -18,6 +17,16 @@ RUN mkdir /var/run/sshd && \
     echo 'root:password' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     echo "GatewayPorts yes" >> /etc/ssh/sshd_config
+
+# Copiar archivo de configuración de Quagga
+COPY quagga.config /etc/quagga/bgpd.conf
+RUN chmod 640 /etc/quagga/bgpd.conf && \
+    chown quagga:quagga /etc/quagga/bgpd.conf
+
+# Crear archivo para inicialización de Quagga
+RUN echo 'zebra=yes\nbgpd=yes' > /etc/quagga/daemons && \
+    touch /var/log/quagga.log && \
+    chown quagga:quagga /var/log/quagga.log
 
 # Exponer el puerto SSH
 EXPOSE 22
@@ -30,5 +39,8 @@ RUN pip3 install -r /tmp/requirements.txt
 COPY prueba_bgp.py /usr/local/bin/
 RUN chmod +x /usr/local/bin/prueba_bgp.py
 
-# Iniciar el servidor SSH
-CMD ["/usr/sbin/sshd", "-D"]
+# Iniciar servicios al inicio del contenedor
+CMD service ssh start && \
+    service zebra start && \
+    service bgpd start && \
+    tail -f /var/log/quagga.log

@@ -1,3 +1,4 @@
+
 services:
   router1:
     build:
@@ -10,6 +11,10 @@ services:
         ipv4_address: 172.16.0.2
       net_bgp:
         ipv4_address: 192.168.10.2
+    ports:
+      - "2221:22"  # Puerto SSH
+    volumes:
+      - ./quagga_rt1.config:/etc/quagga/bgpd.conf
 
   router2:
     build:
@@ -22,6 +27,10 @@ services:
         ipv4_address: 172.16.0.3
       net_bgp:
         ipv4_address: 192.168.10.3
+    ports:
+      - "2222:22"  # Puerto SSH
+    volumes:
+      - ./quagga_rt2.config:/etc/quagga/bgpd.conf
 
   router3:
     build:
@@ -34,6 +43,10 @@ services:
         ipv4_address: 172.16.0.4
       net_bgp:
         ipv4_address: 192.168.10.4
+    ports:
+      - "2223:22"  # Puerto SSH
+    volumes:
+      - ./quagga_rt3.config:/etc/quagga/bgpd.conf
 
   router4:
     build:
@@ -46,6 +59,10 @@ services:
         ipv4_address: 172.16.0.5
       net_bgp:
         ipv4_address: 192.168.10.5
+    ports:
+      - "2224:22"  # Puerto SSH
+    volumes:
+      - ./quagga_rt4.config:/etc/quagga/bgpd.conf
 
 networks:
   net_wan:
