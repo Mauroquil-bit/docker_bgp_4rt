@@ -38,7 +38,6 @@ if __name__ == "__main__":
     {"ip": "10.0.0.4", "username": "root", "password": "password"},
     {"ip": "10.0.0.5", "username": "root", "password": "password"}
 ]
-
     
     for router in routers:
         configure_router(router["ip"], router["username"], router["password"])
