@@ -1,4 +1,3 @@
-
 services:
   router1:
     build:

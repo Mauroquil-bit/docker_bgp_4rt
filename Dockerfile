@@ -10,18 +10,15 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     openssh-server \
-    iputils-ping
+    iputils-ping \
+    net-tools \
+    traceroute
 
 # Configurar el servidor SSH
 RUN mkdir /var/run/sshd && \
     echo 'root:password' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     echo "GatewayPorts yes" >> /etc/ssh/sshd_config
-
-# Copiar archivo de configuración de Quagga
-COPY quagga.config /etc/quagga/bgpd.conf
-RUN chmod 640 /etc/quagga/bgpd.conf && \
-    chown quagga:quagga /etc/quagga/bgpd.conf
 
 # Crear archivo para inicialización de Quagga
 RUN echo 'zebra=yes\nbgpd=yes' > /etc/quagga/daemons && \
