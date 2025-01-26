@@ -11,9 +11,14 @@ services:
       net_bgp:
         ipv4_address: 192.168.10.2
     ports:
-      - "2221:22"  # Puerto SSH
+      - "2221:22"
     volumes:
-      - ./quagga_rt1.config:/etc/quagga/bgpd.conf
+      - ./bgpd_rt1.conf:/etc/quagga/bgpd.conf
+      - ./zebra_rt1.conf:/etc/quagga/zebra.conf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    privileged: true
 
   router2:
     build:
@@ -27,9 +32,14 @@ services:
       net_bgp:
         ipv4_address: 192.168.10.3
     ports:
-      - "2222:22"  # Puerto SSH
+      - "2222:22"
     volumes:
-      - ./quagga_rt2.config:/etc/quagga/bgpd.conf
+      - ./bgpd_rt2.conf:/etc/quagga/bgpd.conf
+      - ./zebra_rt2.conf:/etc/quagga/zebra.conf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    privileged: true
 
   router3:
     build:
@@ -43,9 +53,14 @@ services:
       net_bgp:
         ipv4_address: 192.168.10.4
     ports:
-      - "2223:22"  # Puerto SSH
+      - "2223:22"
     volumes:
-      - ./quagga_rt3.config:/etc/quagga/bgpd.conf
+      - ./bgpd_rt3.conf:/etc/quagga/bgpd.conf
+      - ./zebra_rt3.conf:/etc/quagga/zebra.conf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    privileged: true
 
   router4:
     build:
@@ -59,9 +74,14 @@ services:
       net_bgp:
         ipv4_address: 192.168.10.5
     ports:
-      - "2224:22"  # Puerto SSH
+      - "2224:22"
     volumes:
-      - ./quagga_rt4.config:/etc/quagga/bgpd.conf
+      - ./bgpd_rt4.conf:/etc/quagga/bgpd.conf
+      - ./zebra_rt4.conf:/etc/quagga/zebra.conf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    privileged: true  
 
 networks:
   net_wan:
