@@ -1,169 +1,170 @@
-# Proyecto: Simulación de Configuración BGP con Docker
+# Simulación de BGP con Docker
 
-## ¿De qué se trata este proyecto?
+Este proyecto es una simulación de configuración de BGP entre múltiples routers virtuales utilizando **Docker** y **Quagga**. El objetivo principal es entender el funcionamiento de BGP en un entorno controlado, resolviendo problemas reales relacionados con redes y automatización.
 
-Este proyecto tiene como objetivo simular una configuración de **BGP (Border Gateway Protocol)** entre cuatro routers virtuales utilizando **Docker**. Los contenedores Docker representan routers, cada uno configurado para establecer sesiones BGP con sus vecinos. Al finalizar, los usuarios podrán observar la conectividad y configuración del protocolo mediante el comando `show ip bgp summary`.
+---
 
-Esta simulación está diseñada para:
+## Características principales
 
-- Entusiastas de redes que desean practicar configuraciones de BGP sin hardware físico.
-- Profesionales que buscan entender mejor la integración entre redes y tecnologías de virtualización.
-- Principiantes interesados en aprender sobre automatización de redes con Docker.
+- **4 Routers simulados** configurados como contenedores Docker.
+- **Daemons de Quagga** (`zebra` y `bgpd`) configurados para gestionar las rutas y las sesiones BGP.
+- Conectividad entre routers a través de tres redes: `WAN`, `LAN`, y `BGP`.
+- Pruebas exitosas de conectividad y anuncios de rutas mediante `show ip bgp`.
 
-## ¿Qué es Docker?
+---
 
-Docker es una plataforma de contenedores que permite empaquetar aplicaciones y sus dependencias en un entorno aislado, conocido como contenedor. Esto garantiza que una aplicación funcione de manera consistente en cualquier sistema operativo que soporte Docker.
+## Requisitos previos
 
-En términos simples, un contenedor es como una "mini-computadora virtual" que solo incluye los recursos necesarios para ejecutar una aplicación específica.
+- **Docker** y **Docker Compose** instalados.
+- Conocimientos básicos de redes y BGP.
 
-### Ventajas de Docker:
-
-- **Portabilidad:** Los contenedores funcionan igual en cualquier sistema que tenga Docker instalado.
-- **Eficiencia:** Usa menos recursos que las máquinas virtuales.
-- **Aislamiento:** Cada contenedor está separado del sistema anfitrión y otros contenedores.
-
-## ¿Dónde descargar Docker?
-
-Puedes descargar Docker desde su página oficial: [Docker](https://www.docker.com/products/docker-desktop).
-
-Recomendamos trabajar con **Docker Desktop**, ya que proporciona una interfaz gráfica amigable y herramientas útiles para desarrolladores y administradores de sistemas.
-
-### Requisitos:
-
-- **Windows:** Windows 10/11 con soporte para WSL2.
-- **Mac:** macOS 10.15 o superior.
-- **Linux:** Docker CLI y Docker Engine.
+---
 
 ## Estructura del proyecto
 
-El proyecto se organiza en el directorio `docker_bgp_4rt` con los siguientes archivos y carpetas:
-
 ```plaintext
-docker_bgp_4rt/
-├── docker-compose.yml
-├── Dockerfile
-├── prueba_bgp.py
-├── quagga_rt1.config
-├── quagga_rt2.config
-├── quagga_rt3.config
-├── quagga_rt4.config
-├── README.md
-└── requirements.txt
+routers_bgp_4/
+|— docker_bgp_4rt/
+   |— bgpd_rt1.conf
+   |— bgpd_rt2.conf
+   |— bgpd_rt3.conf
+   |— bgpd_rt4.conf
+   |— zebra_rt1.conf
+   |— zebra_rt2.conf
+   |— zebra_rt3.conf
+   |— zebra_rt4.conf
+   |— docker-compose.yml
+   |— Dockerfile
+   |— README.md
 ```
 
-### Descripción de cada archivo
+---
 
-1. **`docker-compose.yml`****:**
-   Este archivo define y coordina los cuatro contenedores que representan los routers virtuales. También configura las redes virtuales (WAN, LAN, BGP) y asigna direcciones IP y puertos SSH para cada contenedor.
+## Configuración
 
-2. **`Dockerfile`****:**
-   Describe cómo construir la imagen base para los routers. Incluye:
+### **Archivo `bgpd.conf` (ejemplo para router1)**
 
-   - Instalación de Quagga (un software de ruteo).
-   - Configuración de SSH para acceso remoto.
-   - Instalación de dependencias como Python y Netmiko.
+```plaintext
+hostname bgpd
+password zebra
+enable password zebra
+router bgp 65000
+  neighbor 192.168.10.3 remote-as 65001
+  neighbor 192.168.10.4 remote-as 65002
+  neighbor 192.168.10.5 remote-as 65003
+  network 10.0.0.0/24
+  network 172.16.0.0/24
+log file /var/log/quagga/bgpd_router1.log
+```
 
-3. **`prueba_bgp.py`****:**
-   Un script Python que automatiza la configuración de BGP en los routers usando la biblioteca **Netmiko**.
+### **Archivo `zebra.conf` (ejemplo para router1)**
 
-   - **Netmiko:** Herramienta para gestionar dispositivos de red a través de SSH.
-   - Este script se conecta a cada router, ejecuta comandos en el protocolo BGP y valida la configuración.
+```plaintext
+hostname zebra
+password zebra
+enable password zebra
 
-4. **`quagga_rt1.config`**** a ****`quagga_rt4.config`****:**
-   Archivos de configuración específicos para cada router, utilizados por Quagga.
+interface eth0
+  ip address 10.0.0.2/24
+interface eth1
+  ip address 172.16.0.2/24
+interface eth2
+  ip address 192.168.10.2/24
 
-   - Cada archivo define el Autonomous System (AS) de un router, los vecinos BGP y las redes que anuncia.
-
-5. **`requirements.txt`****:**
-   Lista de bibliotecas Python necesarias para ejecutar el proyecto, como Netmiko y Flask.
-
-6. **`README.md`****:**
-   Este archivo, que proporciona una guía completa para configurar y ejecutar el proyecto.
+log file /var/log/quagga/zebra_router1.log
+```
 
 ---
 
-## Explicación detallada del proyecto
+## Ejecución del proyecto
 
-### Redes virtuales configuradas
+### 1. Clonar el repositorio
 
-Se crean tres redes virtuales para conectar los routers:
+```bash
+git clone https://github.com/tu_usuario/routers_bgp_4.git
+cd routers_bgp_4/docker_bgp_4rt
+```
 
-- **WAN (****`10.0.0.0/24`****):** Red que conecta todos los routers como si fueran enlaces de proveedores de servicios.
-- **LAN (****`172.16.0.0/24`****):** Red interna para simular la comunicación local.
-- **BGP (****`192.168.10.0/24`****):** Red para establecer sesiones BGP entre routers.
+### 2. Construir y levantar los contenedores
 
-### Flujo de trabajo:
+```bash
+docker-compose up -d
+```
 
-1. **Construcción de la imagen Docker:**
-   Usando el archivo `Dockerfile`, cada contenedor se prepara con las herramientas necesarias (Quagga, SSH, Python).
+### 3. Verificar los logs
 
-2. **Definición de contenedores:**
-   En `docker-compose.yml`, se especifica:
+Asegúrate de que los daemons estén corriendo correctamente:
 
-   - Asignación de redes.
-   - Direcciones IP para cada contenedor.
-   - Montaje de configuraciones individuales (`quagga_rt*.config`).
+```bash
+docker logs router1
+```
 
-3. **Configuración de BGP:**
-   El script `prueba_bgp.py` automatiza la configuración del protocolo BGP:
+### 4. Conectarte a un router
 
-   - Se conecta a cada router mediante SSH.
-   - Ejecuta comandos para configurar vecinos, AS y redes anunciadas.
+```bash
+docker exec -it router1 bash
+```
 
-4. **Pruebas de conectividad:**
-   Los usuarios pueden conectarse a cada contenedor por SSH y verificar la configuración de BGP:
+Dentro del contenedor:
 
-   ```bash
-   ssh root@localhost -p 2221
-   vtysh
-   show ip bgp summary
-   ```
-
----
-
-## Explicación general del proyecto
-
-Este proyecto es una forma accesible y práctica de aprender sobre BGP y virtualización con Docker. ¡No necesitas hardware costoso ni conocimientos avanzados para empezar! Además, está diseñado para ser comprensible tanto para principiantes como para colegas avanzados.
-
-### Beneficios de este proyecto:
-
-- Experimentar con configuraciones reales de BGP.
-- Comprender la integración de redes con tecnologías modernas como Docker.
-- Practicar automatización usando Python y Netmiko.
+```bash
+vtysh
+show ip bgp summary
+```
 
 ---
 
-## Instrucciones para ejecutar el proyecto
+## Resultados esperados
 
-1. **Clonar el repositorio:**
+### **`show ip bgp summary`**
 
-   ```bash
-   git clone <URL-del-repositorio>
-   cd docker_bgp_4rt
-   ```
+```plaintext
+BGP router identifier 192.168.10.2, local AS number 65000
+RIB entries 3, using 336 bytes of memory
+Peers 3, using 27 KiB of memory
 
-2. **Construir las imágenes Docker:**
+Neighbor        V         AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+192.168.10.3    4 65001       0       0        0    0    0 00:05:22   Established
+192.168.10.4    4 65002       0       0        0    0    0 00:05:22   Established
+192.168.10.5    4 65003       0       0        0    0    0 00:05:22   Established
 
-   ```bash
-   docker-compose build
-   ```
+Total number of neighbors 3
+```
 
-3. **Levantar los contenedores:**
+### **`show ip bgp`**
 
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Verificar conectividad:**
-   Conéctate a un router por SSH:
-
-   ```bash
-   ssh root@localhost -p 2221
-   vtysh
-   show ip bgp summary
-   ```
+```plaintext
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 10.0.0.0/24      0.0.0.0                  0         32768 i
+*> 172.16.0.0/24    0.0.0.0                  0         32768 i
+```
 
 ---
 
-¡Espero que disfrutes este proyecto tanto como yo al desarrollarlo! Si tienes dudas o sugerencias, no dudes en contactarme. 🚀
+## Problemas comunes
 
+1. **Error: `privs_init: initial cap_set_proc failed`**
+   - Solución: Agrega `privileged: true` y `cap_add: [NET_ADMIN, NET_RAW]` en el archivo `docker-compose.yml`.
+
+2. **Sesiones BGP en estado `Active`**
+   - Solución: Verifica la conectividad entre los routers usando `ping`.
+
+---
+
+## Aprendizajes clave
+
+- Configuración detallada de BGP usando Quagga.
+- Resolución de problemas de permisos y conectividad en entornos Docker.
+- Comprensión del funcionamiento de `zebra` y `bgpd` en redes simuladas.
+
+---
+
+## Contribuciones
+
+Si deseas mejorar este proyecto, por favor envía un PR o abre un issue en el repositorio. ¡Todas las contribuciones son bienvenidas!
+
+---
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para más información.
