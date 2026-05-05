@@ -32,7 +32,7 @@ services:
       net_bgp:
         ipv4_address: 192.168.10.3
     ports:
-      - "2222:22"
+      - "2225:22"
     volumes:
       - ./bgpd_rt2.conf:/etc/quagga/bgpd.conf
       - ./zebra_rt2.conf:/etc/quagga/zebra.conf
